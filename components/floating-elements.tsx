@@ -36,8 +36,10 @@ export function FloatingElements({ locale }: FloatingElementsProps) {
   const [showBackToTop, setShowBackToTop] = useState(false)
   const [showChat, setShowChat] = useState(false)
   const [message, setMessage] = useState('')
+  const [windowHeight, setWindowHeight] = useState(0)
 
   useEffect(() => {
+    setWindowHeight(typeof window !== 'undefined' ? window.innerHeight : 0)
     const handleScroll = () => {
       setShowBackToTop(window.scrollY > 500)
     }
@@ -46,7 +48,9 @@ export function FloatingElements({ locale }: FloatingElementsProps) {
   }, [])
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -183,7 +187,7 @@ export function FloatingElements({ locale }: FloatingElementsProps) {
             className="fixed z-30 pointer-events-none"
             initial={{
               x: Math.random() * 100 + 50,
-              y: window.innerHeight + 50,
+              y: windowHeight + 50,
               opacity: 0.5,
             }}
             animate={{
