@@ -34,6 +34,10 @@ export const metadata: Metadata = {
     title: 'The Epoh Abengs',
     description: 'Marriage, Family & Godly Counsel',
   },
+  icons: {
+    icon: '/favicon.jpeg',
+    apple: '/favicon.jpeg',
+  },
 }
 
 export const viewport: Viewport = {
