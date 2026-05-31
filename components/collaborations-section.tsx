@@ -1,9 +1,11 @@
 'use client'
 
-import { motion, useInView } from 'framer-motion'
+import { motion, useInView, useTransform, useSpring } from 'framer-motion'
 import { useRef } from 'react'
 import { Sparkles, Download, CheckCircle2, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useCountUp } from '@/hooks/use-count-up'
+import { useRipple } from '@/hooks/use-ripple'
 
 type Locale = 'en' | 'fr'
 
@@ -84,10 +86,36 @@ const translations = {
   },
 }
 
+function StatCard({ value, label, index, isInView: inView }: { value: string; label: string; index: number; isInView: boolean }) {
+  const numMatch = value.match(/^([\d.]+)(.*)$/)
+  const target = numMatch ? parseFloat(numMatch[1]) : 0
+  const suffix = numMatch ? numMatch[2] : ''
+  const isDecimal = value.includes('.')
+  const count = useCountUp(Math.round(target * (isDecimal ? 100 : 1)), inView)
+  const display = isDecimal ? (count / 100).toFixed(1) : count.toString()
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={inView ? { opacity: 1, scale: 1 } : {}}
+      transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
+      whileHover={{ scale: 1.05, y: -5 }}
+      className="bg-card rounded-2xl p-6 text-center shadow-lg border border-border"
+    >
+      <div className="font-serif text-3xl md:text-4xl font-bold text-primary mb-2">
+        {display}{suffix}
+      </div>
+      <div className="text-sm text-muted-foreground">{label}</div>
+    </motion.div>
+  )
+}
+
 export function CollaborationsSection({ locale }: CollaborationsSectionProps) {
   const t = translations[locale]
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
+  const { addRipple: addRipple1, renderRipples: ripples1 } = useRipple()
+  const { addRipple: addRipple2, renderRipples: ripples2 } = useRipple()
 
   return (
     <section id="collaborations" className="relative py-24 bg-secondary overflow-hidden" ref={ref}>
@@ -138,7 +166,7 @@ export function CollaborationsSection({ locale }: CollaborationsSectionProps) {
           </motion.p>
         </div>
 
-        {/* Stats */}
+        {/* Stats with Count-up */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -146,19 +174,7 @@ export function CollaborationsSection({ locale }: CollaborationsSectionProps) {
           className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16"
         >
           {t.stats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={isInView ? { opacity: 1, scale: 1 } : {}}
-              transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-              whileHover={{ scale: 1.05, y: -5 }}
-              className="bg-card rounded-2xl p-6 text-center shadow-lg border border-border"
-            >
-              <div className="font-serif text-3xl md:text-4xl font-bold text-primary mb-2">
-                {stat.value}
-              </div>
-              <div className="text-sm text-muted-foreground">{stat.label}</div>
-            </motion.div>
+            <StatCard key={stat.label} value={stat.value} label={stat.label} index={index} isInView={isInView} />
           ))}
         </motion.div>
 
@@ -252,6 +268,7 @@ export function CollaborationsSection({ locale }: CollaborationsSectionProps) {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               size="lg"
+              onClick={addRipple1}
               className="group relative overflow-hidden bg-primary hover:bg-primary-dark text-primary-foreground px-8 py-6 text-lg rounded-full shadow-lg shadow-primary/25"
             >
               <motion.span
@@ -259,6 +276,7 @@ export function CollaborationsSection({ locale }: CollaborationsSectionProps) {
                 animate={{ x: ['-100%', '100%'] }}
                 transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
               />
+              {ripples1}
               <span className="relative flex items-center gap-2">
                 <Download className="w-5 h-5" />
                 {t.mediaKit}
@@ -270,9 +288,11 @@ export function CollaborationsSection({ locale }: CollaborationsSectionProps) {
             <Button
               variant="outline"
               size="lg"
-              className="px-8 py-6 text-lg rounded-full border-2 border-gold/30 hover:border-gold hover:bg-gold/5 text-foreground"
+              onClick={addRipple2}
+              className="group relative overflow-hidden px-8 py-6 text-lg rounded-full border-2 border-gold/30 hover:border-gold hover:bg-gold/5 text-foreground"
             >
-              {t.contact}
+              {ripples2}
+              <span className="relative">{t.contact}</span>
             </Button>
           </motion.div>
         </motion.div>

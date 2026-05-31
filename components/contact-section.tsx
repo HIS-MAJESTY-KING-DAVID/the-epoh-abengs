@@ -4,6 +4,7 @@ import { motion, useInView } from 'framer-motion'
 import { useRef, useState } from 'react'
 import { Sparkles, Send, Mail, MapPin, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useRipple } from '@/hooks/use-ripple'
 import { Input } from '@/components/ui/input'
 
 type Locale = 'en' | 'fr'
@@ -59,6 +60,7 @@ export function ContactSection({ locale }: ContactSectionProps) {
   const isInView = useInView(ref, { once: true, margin: '-100px' })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const { addRipple, renderRipples } = useRipple()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -241,6 +243,7 @@ export function ContactSection({ locale }: ContactSectionProps) {
                   <Button
                     type="submit"
                     disabled={isSubmitting || isSubmitted}
+                    onClick={addRipple}
                     className="w-full relative overflow-hidden bg-primary hover:bg-primary-dark text-primary-foreground py-6 text-lg rounded-xl shadow-lg shadow-primary/25 disabled:opacity-70"
                   >
                     {!isSubmitting && !isSubmitted && (
@@ -250,6 +253,7 @@ export function ContactSection({ locale }: ContactSectionProps) {
                         transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
                       />
                     )}
+                    {!isSubmitting && !isSubmitted && renderRipples}
                     <span className="relative flex items-center justify-center gap-2">
                       {isSubmitting ? (
                         <>

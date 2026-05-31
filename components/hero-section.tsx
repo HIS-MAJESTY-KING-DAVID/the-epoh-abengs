@@ -1,8 +1,10 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import { Play, ArrowDown, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useMousePosition } from '@/hooks/use-mouse-position'
+import { useRipple } from '@/hooks/use-ripple'
 
 type Locale = 'en' | 'fr'
 
@@ -37,23 +39,60 @@ const translations = {
 
 export function HeroSection({ locale }: HeroSectionProps) {
   const t = translations[locale]
+  const mouse = useMousePosition()
+
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+  const springX = useSpring(mouseX, { stiffness: 50, damping: 20 })
+  const springY = useSpring(mouseY, { stiffness: 50, damping: 20 })
+
+  const orb1X = useTransform(springX, [0, 1], [-30, 30])
+  const orb1Y = useTransform(springY, [0, 1], [-20, 20])
+  const orb2X = useTransform(springX, [0, 1], [20, -20])
+  const orb2Y = useTransform(springY, [0, 1], [30, -30])
+  const orb3X = useTransform(springX, [0, 1], [-15, 15])
+  const orb3Y = useTransform(springY, [0, 1], [10, -10])
+
+  const { addRipple, renderRipples } = useRipple()
+  const { addRipple: addRipple2, renderRipples: ripples2 } = useRipple()
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    mouseX.set(e.clientX / window.innerWidth)
+    mouseY.set(e.clientY / window.innerHeight)
+  }
 
   return (
     <section
       id="home"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      onMouseMove={handleMouseMove}
     >
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-secondary via-background to-muted">
-        {/* Floating Orbs */}
+        {/* Floating Orbs with Mouse Parallax */}
         <motion.div
           className="absolute top-20 left-10 w-72 h-72 rounded-full bg-primary/10 blur-3xl"
+          style={{ x: orb1X, y: orb1Y }}
           animate={{
-            x: [0, 50, 0],
-            y: [0, 30, 0],
             scale: [1, 1.2, 1],
           }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-gold/10 blur-3xl"
+          style={{ x: orb2X, y: orb2Y }}
+          animate={{
+            scale: [1, 1.1, 1],
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute top-1/2 left-1/3 w-64 h-64 rounded-full bg-gold/5 blur-3xl"
+          style={{ x: orb3X, y: orb3Y }}
+          animate={{
+            scale: [1, 1.15, 1],
+          }}
+          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
           className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-gold/10 blur-3xl"
@@ -167,6 +206,7 @@ export function HeroSection({ locale }: HeroSectionProps) {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               size="lg"
+              onClick={addRipple}
               className="group relative overflow-hidden bg-primary hover:bg-primary-dark text-primary-foreground px-8 py-6 text-lg rounded-full shadow-lg shadow-primary/25"
             >
               <motion.span
@@ -174,6 +214,7 @@ export function HeroSection({ locale }: HeroSectionProps) {
                 animate={{ x: ['-100%', '100%'] }}
                 transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
               />
+              {renderRipples}
               <span className="relative flex items-center gap-2">
                 <Play className="w-5 h-5 fill-current" />
                 {t.cta}
@@ -185,9 +226,11 @@ export function HeroSection({ locale }: HeroSectionProps) {
             <Button
               variant="outline"
               size="lg"
-              className="px-8 py-6 text-lg rounded-full border-2 border-primary/30 hover:border-primary hover:bg-primary/5 text-foreground"
+              onClick={addRipple2}
+              className="group relative overflow-hidden px-8 py-6 text-lg rounded-full border-2 border-primary/30 hover:border-primary hover:bg-primary/5 text-foreground"
             >
-              {t.secondary}
+              {ripples2}
+              <span className="relative">{t.secondary}</span>
             </Button>
           </motion.div>
         </motion.div>

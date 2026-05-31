@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion'
 import { Menu, X, Globe, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -54,8 +54,15 @@ export function Navigation({ locale, onLocaleChange }: NavigationProps) {
     { href: '#contact', label: t.contact },
   ]
 
+  const { scrollYProgress } = useScroll()
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 })
+
   return (
     <>
+      <motion.div
+        className="fixed top-0 left-0 right-0 z-[60] h-1 bg-gradient-to-r from-primary via-gold to-primary origin-left"
+        style={{ scaleX }}
+      />
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
